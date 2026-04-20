@@ -1,5 +1,15 @@
 import { COLOR_OPTIONS, Priority, PriorityColor, colorVar } from "@/lib/todo-types";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Plus, Trash2, GripVertical } from "lucide-react";
 import {
   DndContext,
@@ -73,13 +83,32 @@ const Row = ({
           placeholder="优先级名称"
         />
         {canRemove && (
-          <button
-            onClick={() => onRemove(p.id)}
-            className="text-muted-foreground/60 hover:text-destructive p-1.5 rounded-lg hover:bg-destructive/10 transition"
-            aria-label="删除"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button
+                className="text-muted-foreground/60 hover:text-destructive p-1.5 rounded-lg hover:bg-destructive/10 transition"
+                aria-label="删除"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="max-w-[280px] rounded-xl p-4 !top-[30%]">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-center text-base">确定删除？</AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex-row gap-2 sm:justify-center">
+                <AlertDialogCancel className="flex-1 h-9 rounded-lg border-none bg-secondary hover:bg-secondary/80 mt-0">
+                  取消
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => onRemove(p.id)}
+                  className="flex-1 h-9 rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  删除
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </div>
       <div className="flex items-center gap-2 pl-7">
