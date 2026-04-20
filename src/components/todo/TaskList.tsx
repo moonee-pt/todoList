@@ -15,10 +15,8 @@ interface Props {
   tasks: Task[];
   priorities: Priority[];
   groupByPriority?: boolean;
-  animateExit?: boolean;
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
-  onEdit: (id: string, text: string) => void;
   onReorder: (fromId: string, toId: string) => void;
   emptyText: string;
 }
@@ -27,10 +25,8 @@ export const TaskList = ({
   tasks,
   priorities,
   groupByPriority = false,
-  animateExit = true,
   onToggle,
   onDelete,
-  onEdit,
   onReorder,
   emptyText,
 }: Props) => {
@@ -59,9 +55,9 @@ export const TaskList = ({
     return (
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleEnd}>
         <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-          <div className="flex flex-col gap-4 px-3 py-3">
+          <div className="flex flex-col gap-5 px-3 py-3">
             {groups.map(({ priority, items }) => (
-              <section key={priority.id} className="flex flex-col gap-1.5">
+              <section key={priority.id} className="flex flex-col gap-2">
                 <header className="flex items-center gap-2 px-1">
                   <span
                     className="h-2 w-2 rounded-full"
@@ -75,16 +71,14 @@ export const TaskList = ({
                   </h2>
                   <span className="text-xs text-muted-foreground">{items.length}</span>
                 </header>
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-2">
                   {items.map((t) => (
                     <TaskItem
                       key={t.id}
                       task={t}
                       priority={priority}
-                      animateExit={animateExit}
                       onToggle={onToggle}
                       onDelete={onDelete}
-                      onEdit={onEdit}
                     />
                   ))}
                 </div>
@@ -99,16 +93,14 @@ export const TaskList = ({
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleEnd}>
       <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-        <div className="flex flex-col gap-1.5 px-3 py-3">
+        <div className="flex flex-col gap-2 px-3 py-3">
           {tasks.map((t) => (
             <TaskItem
               key={t.id}
               task={t}
               priority={priorities.find((p) => p.id === t.priorityId)}
-              animateExit={animateExit}
               onToggle={onToggle}
               onDelete={onDelete}
-              onEdit={onEdit}
             />
           ))}
         </div>
