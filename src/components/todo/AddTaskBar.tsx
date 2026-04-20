@@ -88,14 +88,17 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, editingTask, onAdd, 
           </PopoverContent>
         </Popover>
 
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && submit()}
-          placeholder={isEditing ? "编辑任务…" : "添加新任务…"}
-          className="flex-1 bg-transparent text-sm focus:outline-none py-1.5 placeholder:text-muted-foreground"
-        />
-        <div className="flex items-center gap-1.5">
+        <div className="flex-1">
+          <input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && submit()}
+            placeholder={isEditing ? "编辑任务…" : "添加新任务…"}
+            className="w-full bg-transparent text-sm focus:outline-none py-1.5 placeholder:text-muted-foreground"
+          />
+        </div>
+        <div className="flex items-center gap-1.5 ml-2">
+          <div className="w-9" />
           {isEditing && (
             <button
               onClick={() => {
@@ -103,10 +106,10 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, editingTask, onAdd, 
                 setText("");
                 setPid(defaultPriorityId ?? priorities[0]?.id ?? "");
               }}
-              className="h-8 w-8 grid place-items-center rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-all"
+              className="h-9 w-9 grid place-items-center rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-all -ml-[42px]"
               aria-label="取消"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4.5 w-4.5 text-muted-foreground" />
             </button>
           )}
           <button
@@ -115,7 +118,7 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, editingTask, onAdd, 
             className="h-9 w-9 grid place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm disabled:opacity-40 disabled:shadow-none transition-all hover:scale-105 active:scale-95"
             aria-label={isEditing ? "更新" : "添加"}
           >
-            {isEditing ? <Check className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+            {isEditing ? <Check className="h-[1.35rem] w-[1.35rem]" strokeWidth={2.7} /> : <Plus className="h-5 w-5" />}
           </button>
         </div>
       </div>
