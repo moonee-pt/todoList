@@ -71,20 +71,27 @@ export function useTodoStore() {
     let finalTasks = data.tasks;
 
     if (finalTasks.length === 0) {
-      const oldTasks = localStorage.getItem("todo.tasks.v1");
-      const oldPriorities = localStorage.getItem("todo.priorities.v1");
-      if (oldTasks && oldPriorities) {
-        try {
-          const tasks = JSON.parse(oldTasks).map((t: any) => {
-            if (t.priorityId && !t.categoryId) {
-              return { ...t, categoryId: t.priorityId };
-            }
-            return t;
-          });
-          if (tasks.length > 0) {
-            finalTasks = tasks;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.includes("task")) {
+          const raw = localStorage.getItem(key);
+          if (raw) {
+            try {
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].text) {
+                const tasks = parsed.map((t: any) => {
+                  if (t.priorityId && !t.categoryId) {
+                    return { ...t, categoryId: t.priorityId };
+                  }
+                  return t;
+                });
+                if (tasks.length > finalTasks.length) {
+                  finalTasks = tasks;
+                }
+              }
+            } catch {}
           }
-        } catch {}
+        }
       }
     }
 
