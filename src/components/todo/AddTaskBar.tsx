@@ -112,10 +112,10 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, editingTask, onAdd, 
           <button
             onClick={submit}
             disabled={!text.trim()}
-            className="h-8 w-8 grid place-items-center rounded-lg bg-primary text-primary-foreground shadow-sm disabled:opacity-40 disabled:shadow-none transition-all hover:scale-105 active:scale-95"
+            className="h-9 w-9 grid place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm disabled:opacity-40 disabled:shadow-none transition-all hover:scale-105 active:scale-95"
             aria-label={isEditing ? "更新" : "添加"}
           >
-            {isEditing ? <Check className="h-4.5 w-4.5" /> : <Plus className="h-4.5 w-4.5" />}
+            {isEditing ? <Check className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
           </button>
         </div>
       </div>
