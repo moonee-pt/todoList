@@ -67,6 +67,18 @@ export function useTodoStore() {
     });
   }, []);
 
+  const reorderPriorities = useCallback((fromId: string, toId: string) => {
+    setPriorities((prev) => {
+      const fromIdx = prev.findIndex((p) => p.id === fromId);
+      const toIdx = prev.findIndex((p) => p.id === toId);
+      if (fromIdx < 0 || toIdx < 0) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(fromIdx, 1);
+      next.splice(toIdx, 0, moved);
+      return next;
+    });
+  }, []);
+
   const upsertPriority = useCallback((p: Priority) => {
     setPriorities((prev) => {
       const idx = prev.findIndex((x) => x.id === p.id);
@@ -100,6 +112,7 @@ export function useTodoStore() {
     reorderTasks,
     upsertPriority,
     removePriority,
+    reorderPriorities,
     setPriorities,
   };
 }
