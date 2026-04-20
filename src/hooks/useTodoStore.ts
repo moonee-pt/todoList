@@ -39,6 +39,12 @@ export function useTodoStore() {
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
   }, []);
 
+  const editTask = useCallback((id: string, text: string) => {
+    const v = text.trim();
+    if (!v) return;
+    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, text: v } : t)));
+  }, []);
+
   const deleteTask = useCallback((id: string) => {
     setTasks((prev) => prev.filter((t) => t.id !== id));
   }, []);
@@ -108,6 +114,7 @@ export function useTodoStore() {
     tasks,
     addTask,
     toggleTask,
+    editTask,
     deleteTask,
     reorderTasks,
     upsertPriority,

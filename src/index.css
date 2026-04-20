@@ -13,10 +13,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    /* Indigo */
-    --primary: 235 84% 62%;
+    /* Slate ink */
+    --primary: 222 47% 18%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 250 90% 72%;
+    --primary-glow: 222 30% 35%;
 
     --secondary: 220 30% 95%;
     --secondary-foreground: 222 47% 15%;
@@ -24,15 +24,15 @@
     --muted: 220 25% 95%;
     --muted-foreground: 220 12% 48%;
 
-    --accent: 235 84% 96%;
-    --accent-foreground: 235 84% 35%;
+    --accent: 222 25% 94%;
+    --accent-foreground: 222 47% 18%;
 
     --destructive: 0 80% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 220 20% 90%;
     --input: 220 20% 90%;
-    --ring: 235 84% 62%;
+    --ring: 222 47% 18%;
 
     --radius: 1rem;
 
@@ -45,7 +45,7 @@
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
     --gradient-surface: linear-gradient(180deg, hsl(220 40% 99%), hsl(220 33% 96%));
     --shadow-soft: 0 1px 2px hsl(220 20% 50% / 0.06), 0 4px 14px hsl(220 30% 40% / 0.06);
-    --shadow-pop: 0 8px 28px hsl(235 60% 50% / 0.18);
+    --shadow-pop: 0 6px 18px hsl(222 30% 20% / 0.18);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -67,9 +67,9 @@
     --popover: 230 22% 11%;
     --popover-foreground: 220 25% 96%;
 
-    --primary: 240 90% 72%;
+    --primary: 220 25% 96%;
     --primary-foreground: 230 30% 8%;
-    --primary-glow: 260 90% 78%;
+    --primary-glow: 220 15% 80%;
 
     --secondary: 230 18% 16%;
     --secondary-foreground: 220 25% 96%;
@@ -77,20 +77,20 @@
     --muted: 230 18% 15%;
     --muted-foreground: 220 12% 65%;
 
-    --accent: 235 40% 20%;
-    --accent-foreground: 240 90% 85%;
+    --accent: 230 20% 20%;
+    --accent-foreground: 220 25% 96%;
 
     --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 230 18% 20%;
     --input: 230 18% 20%;
-    --ring: 240 90% 72%;
+    --ring: 220 25% 96%;
 
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
     --gradient-surface: linear-gradient(180deg, hsl(230 25% 9%), hsl(230 25% 6%));
     --shadow-soft: 0 1px 2px hsl(0 0% 0% / 0.3), 0 4px 14px hsl(0 0% 0% / 0.25);
-    --shadow-pop: 0 8px 28px hsl(240 90% 50% / 0.35);
+    --shadow-pop: 0 6px 18px hsl(0 0% 0% / 0.45);
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
