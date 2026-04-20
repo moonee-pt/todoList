@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Priority, colorVar } from "@/lib/todo-types";
-import { Plus, ChevronUp, Check } from "lucide-react";
+import { Plus, ChevronUp, Check, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 
@@ -95,7 +95,7 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, editingTask, onAdd, 
           placeholder={isEditing ? "编辑任务…" : "添加新任务…"}
           className="flex-1 bg-transparent text-sm focus:outline-none py-1.5 placeholder:text-muted-foreground"
         />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {isEditing && (
             <button
               onClick={() => {
@@ -103,18 +103,19 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, editingTask, onAdd, 
                 setText("");
                 setPid(defaultPriorityId ?? priorities[0]?.id ?? "");
               }}
-              className="h-9 px-3 rounded-xl bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/80 transition-all"
+              className="h-8 w-8 grid place-items-center rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-all"
+              aria-label="取消"
             >
-              取消
+              <X className="h-4 w-4" />
             </button>
           )}
           <button
             onClick={submit}
             disabled={!text.trim()}
-            className="h-9 px-4 rounded-xl bg-primary text-primary-foreground shadow-sm disabled:opacity-40 disabled:shadow-none transition-all hover:scale-105 active:scale-95 text-xs font-medium"
+            className="h-8 w-8 grid place-items-center rounded-lg bg-primary text-primary-foreground shadow-sm disabled:opacity-40 disabled:shadow-none transition-all hover:scale-105 active:scale-95"
             aria-label={isEditing ? "更新" : "添加"}
           >
-            {isEditing ? "更新" : <Plus className="h-5 w-5" />}
+            {isEditing ? <Check className="h-4.5 w-4.5" /> : <Plus className="h-4.5 w-4.5" />}
           </button>
         </div>
       </div>
