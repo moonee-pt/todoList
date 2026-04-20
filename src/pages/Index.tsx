@@ -6,6 +6,7 @@ import { TaskList } from "@/components/todo/TaskList";
 import { AddTaskBar } from "@/components/todo/AddTaskBar";
 import { CategorySettings } from "@/components/todo/CategorySettings";
 import { CopyDialog } from "@/components/todo/CopyDialog";
+import { DataRescue } from "@/components/todo/DataRescue";
 import { ListTodo, CheckCircle2 } from "lucide-react";
 
 type Tab = "todo" | "done";
@@ -67,12 +68,14 @@ const Index = () => {
           categories={categories}
           groupByCategory={groupByCategory}
           onToggle={toggleTask}
-          onDelete={deleteTask}
-          onEdit={updateTask}
-          onStartEdit={(task) => setEditingTask(task)}
-          onReorder={(from, to) => reorderTasks(tab === "done", from, to)}
-          emptyText={tab === "todo" ? "暂无待办任务，添加一个开始吧 ✨" : "还没有完成的任务"}
-        />
+        onDelete={deleteTask}
+        onEdit={updateTask}
+        onStartEdit={(task) => setEditingTask(task)}
+        onReorder={(from, to) => reorderTasks(tab === "done", from, to)}
+        emptyText={tab === "todo" ? "暂无待办任务，添加一个开始吧 ✨" : "还没有完成的任务"}
+      />
+
+      {tasks.length === 0 && tab === "todo" && <DataRescue />}
       </main>
 
       <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto">
