@@ -1,9 +1,9 @@
 services:
   - type: web
     name: todoList
-    env: node
+    env: static
     buildCommand: npm install && npm run build
-    startCommand: npx serve -s dist -l 8080
+    publishDirectory: dist
     buildFilter:
       paths:
         - src/**
