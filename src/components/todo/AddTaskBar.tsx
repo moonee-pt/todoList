@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Priority, colorVar } from "@/lib/todo-types";
 import { Plus, ChevronUp, Check, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -20,10 +20,12 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, editingTask, onAdd, 
 
   const isEditing = !!editingTask;
 
-  if (editingTask && text !== editingTask.text) {
-    setText(editingTask.text);
-    setPid(editingTask.priorityId);
-  }
+  useEffect(() => {
+    if (editingTask) {
+      setText(editingTask.text);
+      setPid(editingTask.priorityId);
+    }
+  }, [editingTask?.id]);
 
   const currentPid = priorities.find((p) => p.id === pid) ? pid : priorities[0]?.id ?? "";
   const current = priorities.find((p) => p.id === currentPid);
