@@ -15,6 +15,7 @@ const Index = () => {
     tasks,
     addTask,
     toggleTask,
+    editTask,
     deleteTask,
     reorderTasks,
     upsertPriority,
