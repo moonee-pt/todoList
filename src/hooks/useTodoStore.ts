@@ -114,6 +114,7 @@ export function useTodoStore() {
     tasks,
     addTask,
     toggleTask,
+    editTask,
     deleteTask,
     reorderTasks,
     upsertPriority,
