@@ -13,10 +13,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    /* Indigo */
-    --primary: 235 84% 62%;
+    /* Slate ink */
+    --primary: 222 47% 18%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 250 90% 72%;
+    --primary-glow: 222 30% 35%;
 
     --secondary: 220 30% 95%;
     --secondary-foreground: 222 47% 15%;
