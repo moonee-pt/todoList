@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTodoStore } from "@/hooks/useTodoStore";
+import { useTheme } from "@/hooks/useTheme";
 import { FilterBar } from "@/components/todo/FilterBar";
 import { TaskList } from "@/components/todo/TaskList";
 import { AddTaskBar } from "@/components/todo/AddTaskBar";
@@ -18,7 +19,10 @@ const Index = () => {
     reorderTasks,
     upsertPriority,
     removePriority,
+    reorderPriorities,
   } = useTodoStore();
+
+  const { theme, toggle: toggleTheme } = useTheme();
 
   const [tab, setTab] = useState<Tab>("todo");
   const [filter, setFilter] = useState<string | "all">("all");
@@ -33,33 +37,38 @@ const Index = () => {
     });
   }, [tasks, tab, filter]);
 
+  const groupByPriority = filter === "all";
+
   return (
-    <div className="min-h-screen bg-background flex flex-col max-w-md mx-auto relative">
+    <div className="min-h-screen flex flex-col max-w-md mx-auto relative">
       <FilterBar
         priorities={priorities}
         selected={filter}
         onSelect={setFilter}
         onOpenSettings={() => setSettingsOpen(true)}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
-      <main className="flex-1 pb-40">
+      <main className="flex-1 pb-44">
         <TaskList
           tasks={visible}
           priorities={priorities}
+          groupByPriority={groupByPriority}
           onToggle={toggleTask}
           onDelete={deleteTask}
           onReorder={(from, to) => reorderTasks(tab === "done", from, to)}
-          emptyText={tab === "todo" ? "暂无待办任务" : "暂无已完成任务"}
+          emptyText={tab === "todo" ? "暂无待办任务，添加一个开始吧 ✨" : "还没有完成的任务"}
         />
       </main>
 
       <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto">
         <AddTaskBar priorities={priorities} onAdd={addTask} />
-        <nav className="grid grid-cols-2 bg-card border-t border-border pb-[env(safe-area-inset-bottom)]">
+        <nav className="grid grid-cols-2 bg-card/90 backdrop-blur-xl border-t border-border/60 pb-[env(safe-area-inset-bottom)]">
           <button
             onClick={() => setTab("todo")}
-            className={`flex flex-col items-center gap-0.5 py-2 text-xs ${
-              tab === "todo" ? "text-foreground" : "text-muted-foreground"
+            className={`flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium transition-colors ${
+              tab === "todo" ? "text-primary" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <ListTodo className="h-5 w-5" />
@@ -67,8 +76,8 @@ const Index = () => {
           </button>
           <button
             onClick={() => setTab("done")}
-            className={`flex flex-col items-center gap-0.5 py-2 text-xs ${
-              tab === "done" ? "text-foreground" : "text-muted-foreground"
+            className={`flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium transition-colors ${
+              tab === "done" ? "text-primary" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <CheckCircle2 className="h-5 w-5" />
@@ -83,6 +92,7 @@ const Index = () => {
         priorities={priorities}
         onUpsert={upsertPriority}
         onRemove={removePriority}
+        onReorder={reorderPriorities}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Priority, colorVar } from "@/lib/todo-types";
-import { Plus } from "lucide-react";
+import { Plus, ChevronDown } from "lucide-react";
 
 interface Props {
   priorities: Priority[];
@@ -22,33 +22,40 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, onAdd }: Props) => {
   };
 
   return (
-    <div className="px-3 py-2 bg-background border-t border-border">
-      <div className="flex items-center gap-2 bg-card border border-border rounded-2xl pl-2 pr-1 py-1 shadow-sm">
-        <select
-          value={currentPid}
-          onChange={(e) => setPid(e.target.value)}
-          className="text-xs font-medium bg-transparent border-0 focus:outline-none rounded-full px-2 py-1"
-          style={{
-            backgroundColor: current ? colorVar(current.color) : undefined,
-            color: "white",
-          }}
-        >
-          {priorities.map((p) => (
-            <option key={p.id} value={p.id} className="text-foreground bg-background">
-              {p.name}
-            </option>
-          ))}
-        </select>
+    <div className="px-3 pt-3 pb-2 bg-gradient-to-t from-background via-background to-background/0">
+      <div className="flex items-center gap-2 bg-card border border-border rounded-2xl pl-2 pr-1.5 py-1.5 shadow-soft">
+        <div className="relative">
+          <select
+            value={currentPid}
+            onChange={(e) => setPid(e.target.value)}
+            className="appearance-none text-xs font-semibold border-0 focus:outline-none rounded-full pl-3 pr-7 py-1.5 cursor-pointer"
+            style={{
+              backgroundColor: current ? `hsl(var(--prio-${current.color}) / 0.15)` : undefined,
+              color: current ? colorVar(current.color) : undefined,
+            }}
+          >
+            {priorities.map((p) => (
+              <option key={p.id} value={p.id} className="text-foreground bg-background">
+                {p.name}
+              </option>
+            ))}
+          </select>
+          <ChevronDown
+            className="h-3 w-3 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none"
+            style={{ color: current ? colorVar(current.color) : undefined }}
+          />
+        </div>
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submit()}
           placeholder="添加新任务…"
-          className="flex-1 bg-transparent text-sm focus:outline-none py-2"
+          className="flex-1 bg-transparent text-sm focus:outline-none py-2 placeholder:text-muted-foreground"
         />
         <button
           onClick={submit}
-          className="h-9 w-9 grid place-items-center rounded-full bg-foreground text-background"
+          disabled={!text.trim()}
+          className="h-9 w-9 grid place-items-center rounded-full bg-gradient-primary text-primary-foreground shadow-pop disabled:opacity-40 disabled:shadow-none transition-all hover:scale-105 active:scale-95"
           aria-label="添加"
         >
           <Plus className="h-5 w-5" />
