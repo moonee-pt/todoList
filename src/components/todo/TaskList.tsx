@@ -30,6 +30,7 @@ export const TaskList = ({
   onToggle,
   onDelete,
   onEdit,
+  onStartEdit,
   onReorder,
   emptyText,
 }: Props) => {
