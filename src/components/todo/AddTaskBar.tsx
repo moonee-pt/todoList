@@ -55,7 +55,7 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, onAdd }: Props) => {
         <button
           onClick={submit}
           disabled={!text.trim()}
-          className="h-9 w-9 grid place-items-center rounded-full bg-gradient-primary text-primary-foreground shadow-pop disabled:opacity-40 disabled:shadow-none transition-all hover:scale-105 active:scale-95"
+          className="h-9 w-9 grid place-items-center rounded-full bg-foreground text-background shadow-soft disabled:opacity-40 disabled:shadow-none transition-all hover:opacity-90 active:scale-95"
           aria-label="添加"
         >
           <Plus className="h-5 w-5" />
