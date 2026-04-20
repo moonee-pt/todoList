@@ -57,22 +57,29 @@ function migrateData(): {
 }
 
 export function useTodoStore() {
-  const [categories, setCategories] = useState<Category[]>(() => {
+  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
     const data = migrateData();
     const hasNewCategories = localStorage.getItem(KEY_CATEGORIES);
     if (!hasNewCategories) {
       localStorage.setItem(KEY_CATEGORIES, JSON.stringify(data.categories));
     }
-    return data.categories;
-  });
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    const data = migrateData();
-    return data.tasks;
-  });
 
-  useEffect(() => {
-    setTasks((prev) => prev.filter((t) => categories.some((c) => c.id === t.categoryId)));
-  }, [categories]);
+    const storedTasks = localStorage.getItem(KEY_TASKS);
+    let finalTasks = data.tasks;
+    if (storedTasks && data.tasks.length === 0) {
+      try {
+        finalTasks = JSON.parse(storedTasks);
+      } catch {}
+    }
+
+    setCategories(data.categories);
+    setTasks(finalTasks);
+    setInitialized(true);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem(KEY_CATEGORIES, JSON.stringify(categories));
