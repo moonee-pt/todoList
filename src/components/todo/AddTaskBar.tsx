@@ -27,6 +27,14 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, editingTask, onAdd, 
     }
   }, [editingTask?.id]);
 
+  useEffect(() => {
+    const textarea = document.querySelector("textarea");
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 96)}px`;
+    }
+  }, [text]);
+
   const currentPid = priorities.find((p) => p.id === pid) ? pid : priorities[0]?.id ?? "";
   const current = priorities.find((p) => p.id === currentPid);
 
@@ -91,12 +99,13 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, editingTask, onAdd, 
         </Popover>
 
         <div className="flex-1">
-          <input
+          <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && submit()}
+            onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), submit())}
             placeholder={isEditing ? "编辑任务…" : "添加新任务…"}
-            className="w-full bg-transparent text-sm focus:outline-none py-1.5 placeholder:text-muted-foreground"
+            className="w-full bg-transparent text-sm focus:outline-none py-1.5 placeholder:text-muted-foreground resize-none leading-relaxed max-h-24 overflow-y-auto"
+            rows={1}
           />
         </div>
         <div className="flex items-center gap-1.5 ml-2">

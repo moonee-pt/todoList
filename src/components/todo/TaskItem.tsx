@@ -77,7 +77,7 @@ export const TaskItem = ({ task, priority, onToggle, onDelete, onEdit, onStartEd
 
         <div className="flex-1 min-w-0">
           <p
-            className={`text-sm leading-snug break-words transition-all duration-300 ${
+            className={`text-sm leading-relaxed break-words whitespace-pre-wrap transition-all duration-300 pr-1 ${
               task.done ? "text-muted-foreground" : "text-foreground"
             }`}
           >
