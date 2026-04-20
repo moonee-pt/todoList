@@ -88,18 +88,6 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, editingTask, onAdd, 
           </PopoverContent>
         </Popover>
 
-        {isEditing && (
-          <button
-            onClick={() => {
-              onCancelEdit?.();
-              setText("");
-              setPid(defaultPriorityId ?? priorities[0]?.id ?? "");
-            }}
-            className="h-9 px-3 rounded-xl bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/80 transition-all"
-          >
-            取消
-          </button>
-        )}
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -107,15 +95,28 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, editingTask, onAdd, 
           placeholder={isEditing ? "编辑任务…" : "添加新任务…"}
           className="flex-1 bg-transparent text-sm focus:outline-none py-1.5 placeholder:text-muted-foreground"
         />
-        <button
-          onClick={submit}
-          disabled={!text.trim()}
-          className="h-9 w-9 grid place-items-center rounded-xl text-primary-foreground shadow-sm disabled:opacity-40 disabled:shadow-none transition-all hover:scale-105 active:scale-95"
-          style={{ backgroundColor: isEditing ? "hsl(var(--destructive))" : "hsl(var(--primary))" }}
-          aria-label={isEditing ? "更新" : "添加"}
-        >
-          <Plus className="h-5 w-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          {isEditing && (
+            <button
+              onClick={() => {
+                onCancelEdit?.();
+                setText("");
+                setPid(defaultPriorityId ?? priorities[0]?.id ?? "");
+              }}
+              className="h-9 px-3 rounded-xl bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/80 transition-all"
+            >
+              取消
+            </button>
+          )}
+          <button
+            onClick={submit}
+            disabled={!text.trim()}
+            className="h-9 px-4 rounded-xl bg-primary text-primary-foreground shadow-sm disabled:opacity-40 disabled:shadow-none transition-all hover:scale-105 active:scale-95 text-xs font-medium"
+            aria-label={isEditing ? "更新" : "添加"}
+          >
+            {isEditing ? "更新" : <Plus className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
     </div>
   );
