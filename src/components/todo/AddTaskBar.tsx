@@ -7,21 +7,36 @@ import { Button } from "@/components/ui/button";
 interface Props {
   priorities: Priority[];
   defaultPriorityId?: string;
+  editingTask?: { id: string; text: string; priorityId: string } | null;
   onAdd: (text: string, priorityId: string) => void;
+  onUpdate?: (id: string, text: string, priorityId: string) => void;
+  onCancelEdit?: () => void;
 }
 
-export const AddTaskBar = ({ priorities, defaultPriorityId, onAdd }: Props) => {
+export const AddTaskBar = ({ priorities, defaultPriorityId, editingTask, onAdd, onUpdate, onCancelEdit }: Props) => {
   const [text, setText] = useState("");
   const [pid, setPid] = useState(defaultPriorityId ?? priorities[0]?.id ?? "");
   const [open, setOpen] = useState(false);
+
+  const isEditing = !!editingTask;
+
+  if (editingTask && text !== editingTask.text) {
+    setText(editingTask.text);
+    setPid(editingTask.priorityId);
+  }
 
   const currentPid = priorities.find((p) => p.id === pid) ? pid : priorities[0]?.id ?? "";
   const current = priorities.find((p) => p.id === currentPid);
 
   const submit = () => {
     if (!text.trim() || !currentPid) return;
-    onAdd(text, currentPid);
+    if (isEditing && onUpdate && editingTask) {
+      onUpdate(editingTask.id, text, currentPid);
+    } else {
+      onAdd(text, currentPid);
+    }
     setText("");
+    setPid(defaultPriorityId ?? priorities[0]?.id ?? "");
   };
 
   return (
@@ -73,18 +88,31 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, onAdd }: Props) => {
           </PopoverContent>
         </Popover>
 
+        {isEditing && (
+          <button
+            onClick={() => {
+              onCancelEdit?.();
+              setText("");
+              setPid(defaultPriorityId ?? priorities[0]?.id ?? "");
+            }}
+            className="h-9 px-3 rounded-xl bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/80 transition-all"
+          >
+            取消
+          </button>
+        )}
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submit()}
-          placeholder="添加新任务…"
+          placeholder={isEditing ? "编辑任务…" : "添加新任务…"}
           className="flex-1 bg-transparent text-sm focus:outline-none py-1.5 placeholder:text-muted-foreground"
         />
         <button
           onClick={submit}
           disabled={!text.trim()}
-          className="h-9 w-9 grid place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm disabled:opacity-40 disabled:shadow-none transition-all hover:scale-105 active:scale-95"
-          aria-label="添加"
+          className="h-9 w-9 grid place-items-center rounded-xl text-primary-foreground shadow-sm disabled:opacity-40 disabled:shadow-none transition-all hover:scale-105 active:scale-95"
+          style={{ backgroundColor: isEditing ? "hsl(var(--destructive))" : "hsl(var(--primary))" }}
+          aria-label={isEditing ? "更新" : "添加"}
         >
           <Plus className="h-5 w-5" />
         </button>

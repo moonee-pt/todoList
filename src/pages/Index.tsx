@@ -28,6 +28,11 @@ const Index = () => {
   const [tab, setTab] = useState<Tab>("todo");
   const [filter, setFilter] = useState<string | "all">("all");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<{
+    id: string;
+    text: string;
+    priorityId: string;
+  } | null>(null);
 
   const visible = useMemo(() => {
     return tasks.filter((t) => {
@@ -59,13 +64,30 @@ const Index = () => {
           onToggle={toggleTask}
           onDelete={deleteTask}
           onEdit={updateTask}
+          onStartEdit={(task) => setEditingTask(task)}
           onReorder={(from, to) => reorderTasks(tab === "done", from, to)}
           emptyText={tab === "todo" ? "暂无待办任务，添加一个开始吧 ✨" : "还没有完成的任务"}
         />
       </main>
 
       <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto">
-        <AddTaskBar priorities={priorities} onAdd={addTask} />
+        <AddTaskBar
+          priorities={priorities}
+          editingTask={editingTask}
+          onAdd={addTask}
+          onUpdate={(id, text, priorityId) => {
+            updateTask(id, text);
+            if (priorities.find((p) => p.id === priorityId)) {
+              const task = tasks.find((t) => t.id === id);
+              if (task && task.priorityId !== priorityId) {
+                deleteTask(id);
+                addTask(text, priorityId);
+              }
+            }
+            setEditingTask(null);
+          }}
+          onCancelEdit={() => setEditingTask(null)}
+        />
         <nav className="grid grid-cols-2 bg-card/90 backdrop-blur-xl border-t border-border/60 pb-[env(safe-area-inset-bottom)]">
           <button
             onClick={() => setTab("todo")}

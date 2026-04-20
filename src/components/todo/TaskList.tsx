@@ -14,10 +14,11 @@ import { TaskItem } from "./TaskItem";
 interface Props {
   tasks: Task[];
   priorities: Priority[];
-  groupByPriority?: boolean;
+  groupByPriority: boolean;
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
   onEdit: (id: string, text: string) => void;
+  onStartEdit: (task: { id: string; text: string; priorityId: string }) => void;
   onReorder: (fromId: string, toId: string) => void;
   emptyText: string;
 }
@@ -84,6 +85,7 @@ export const TaskList = ({
                       onToggle={onToggle}
                       onDelete={onDelete}
                       onEdit={onEdit}
+                      onStartEdit={onStartEdit}
                     />
                   ))}
                 </div>
@@ -100,15 +102,16 @@ export const TaskList = ({
       <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
         <div className="flex flex-col gap-2 px-3 py-3">
           {tasks.map((t) => (
-            <TaskItem
-              key={t.id}
-              task={t}
-              priority={priorities.find((p) => p.id === t.priorityId)}
-              onToggle={onToggle}
-              onDelete={onDelete}
-              onEdit={onEdit}
-            />
-          ))}
+                <TaskItem
+                  key={t.id}
+                  task={t}
+                  priority={priorities.find((p) => p.id === t.priorityId)}
+                  onToggle={onToggle}
+                  onDelete={onDelete}
+                  onEdit={onEdit}
+                  onStartEdit={onStartEdit}
+                />
+              ))}
         </div>
       </SortableContext>
     </DndContext>

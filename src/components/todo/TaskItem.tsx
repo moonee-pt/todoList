@@ -2,9 +2,7 @@ import { useState } from "react";
 import { Task, Priority, colorVar } from "@/lib/todo-types";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Check, Trash2, Edit2, X } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Check, Trash2, Edit2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,15 +20,14 @@ interface Props {
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
   onEdit: (id: string, text: string) => void;
+  onStartEdit: (task: { id: string; text: string; priorityId: string }) => void;
 }
 
-export const TaskItem = ({ task, priority, onToggle, onDelete, onEdit }: Props) => {
+export const TaskItem = ({ task, priority, onToggle, onDelete, onEdit, onStartEdit }: Props) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
   });
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [editText, setEditText] = useState(task.text);
   const [isLeaving, setIsLeaving] = useState(false);
 
   const style: React.CSSProperties = {
@@ -47,13 +44,6 @@ export const TaskItem = ({ task, priority, onToggle, onDelete, onEdit }: Props) 
     setTimeout(() => {
       onToggle(task.id);
     }, 300);
-  };
-
-  const handleEditSubmit = () => {
-    if (editText.trim() && editText.trim() !== task.text) {
-      onEdit(task.id, editText.trim());
-    }
-    setIsEditing(false);
   };
 
   return (
@@ -86,56 +76,24 @@ export const TaskItem = ({ task, priority, onToggle, onDelete, onEdit }: Props) 
         </button>
 
         <div className="flex-1 min-w-0">
-          {isEditing ? (
-            <div className="flex items-center gap-2">
-              <Input
-                value={editText}
-                onChange={(e) => setEditText(e.target.value)}
-                className="h-8 text-sm"
-                autoFocus
-                onKeyDown={(e) => e.key === "Enter" && handleEditSubmit()}
-                onClick={(e) => e.stopPropagation()}
-              />
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-8 w-8 p-0"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEditSubmit();
-                }}
-              >
-                <Check className="h-4 w-4" />
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-8 w-8 p-0"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEditText(task.text);
-                  setIsEditing(false);
-                }}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ) : (
-            <p
-              className={`text-sm leading-snug break-words transition-all duration-300 ${
-                task.done ? "text-muted-foreground" : "text-foreground"
-              }`}
-            >
-              {task.text}
-            </p>
-          )}
+          <p
+            className={`text-sm leading-snug break-words transition-all duration-300 ${
+              task.done ? "text-muted-foreground" : "text-foreground"
+            }`}
+          >
+            {task.text}
+          </p>
         </div>
 
         <div className="flex items-center gap-1">
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setIsEditing(true);
+              onStartEdit({
+                id: task.id,
+                text: task.text,
+                priorityId: task.priorityId,
+              });
             }}
             onPointerDown={(e) => e.stopPropagation()}
             className="text-muted-foreground/50 hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition duration-200"
