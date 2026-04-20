@@ -42,7 +42,7 @@ export const FilterBar = ({
           onClick={() => onSelect("all")}
           className={`shrink-0 px-4 h-9 rounded-full text-sm font-medium transition-all ${
             selected === "all"
-              ? "bg-gradient-primary text-primary-foreground shadow-pop"
+              ? "bg-primary text-primary-foreground shadow-sm"
               : "bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground"
           }`}
         >

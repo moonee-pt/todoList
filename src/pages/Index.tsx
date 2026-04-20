@@ -16,6 +16,7 @@ const Index = () => {
     addTask,
     toggleTask,
     deleteTask,
+    updateTask,
     reorderTasks,
     upsertPriority,
     removePriority,
@@ -57,6 +58,7 @@ const Index = () => {
           groupByPriority={groupByPriority}
           onToggle={toggleTask}
           onDelete={deleteTask}
+          onEdit={updateTask}
           onReorder={(from, to) => reorderTasks(tab === "done", from, to)}
           emptyText={tab === "todo" ? "暂无待办任务，添加一个开始吧 ✨" : "还没有完成的任务"}
         />

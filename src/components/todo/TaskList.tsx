@@ -17,6 +17,7 @@ interface Props {
   groupByPriority?: boolean;
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
+  onEdit: (id: string, text: string) => void;
   onReorder: (fromId: string, toId: string) => void;
   emptyText: string;
 }
@@ -27,6 +28,7 @@ export const TaskList = ({
   groupByPriority = false,
   onToggle,
   onDelete,
+  onEdit,
   onReorder,
   emptyText,
 }: Props) => {
@@ -58,18 +60,20 @@ export const TaskList = ({
           <div className="flex flex-col gap-5 px-3 py-3">
             {groups.map(({ priority, items }) => (
               <section key={priority.id} className="flex flex-col gap-2">
-                <header className="flex items-center gap-2 px-1">
+                <header className="flex items-center gap-2 px-1 py-0.5">
                   <span
-                    className="h-2 w-2 rounded-full"
+                    className="h-2 w-2 rounded-full shrink-0"
                     style={{ backgroundColor: colorVar(priority.color) }}
                   />
                   <h2
-                    className="text-xs font-semibold uppercase tracking-wider"
+                    className="text-xs font-medium uppercase tracking-wider"
                     style={{ color: colorVar(priority.color) }}
                   >
                     {priority.name}
                   </h2>
-                  <span className="text-xs text-muted-foreground">{items.length}</span>
+                  <span className="text-[11px] text-muted-foreground font-normal px-1.5 py-0.5 rounded-full bg-secondary shrink-0">
+                    {items.length}
+                  </span>
                 </header>
                 <div className="flex flex-col gap-2">
                   {items.map((t) => (
@@ -79,6 +83,7 @@ export const TaskList = ({
                       priority={priority}
                       onToggle={onToggle}
                       onDelete={onDelete}
+                      onEdit={onEdit}
                     />
                   ))}
                 </div>
@@ -101,6 +106,7 @@ export const TaskList = ({
               priority={priorities.find((p) => p.id === t.priorityId)}
               onToggle={onToggle}
               onDelete={onDelete}
+              onEdit={onEdit}
             />
           ))}
         </div>
