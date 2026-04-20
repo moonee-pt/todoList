@@ -1,20 +1,22 @@
-import { Priority, colorVar } from "@/lib/todo-types";
-import { Settings2, Moon, Sun } from "lucide-react";
+import { Category, colorVar } from "@/lib/todo-types";
+import { Settings2, Moon, Sun, Copy } from "lucide-react";
 
 interface Props {
-  priorities: Priority[];
+  categories: Category[];
   selected: string | "all";
   onSelect: (id: string | "all") => void;
   onOpenSettings: () => void;
+  onOpenCopy: () => void;
   theme: "light" | "dark";
   onToggleTheme: () => void;
 }
 
 export const FilterBar = ({
-  priorities,
+  categories,
   selected,
   onSelect,
   onOpenSettings,
+  onOpenCopy,
   theme,
   onToggleTheme,
 }: Props) => {
@@ -30,9 +32,16 @@ export const FilterBar = ({
           {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
         <button
+          onClick={onOpenCopy}
+          className="h-9 w-9 grid place-items-center rounded-full bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground transition"
+          aria-label="复制"
+        >
+          <Copy className="h-4 w-4" />
+        </button>
+        <button
           onClick={onOpenSettings}
           className="h-9 w-9 grid place-items-center rounded-full bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground transition"
-          aria-label="管理优先级"
+          aria-label="管理分类"
         >
           <Settings2 className="h-4 w-4" />
         </button>
@@ -48,7 +57,7 @@ export const FilterBar = ({
         >
           全部
         </button>
-        {priorities.map((p) => {
+        {categories.filter((c) => !c.parentId).map((p) => {
           const active = selected === p.id;
           return (
             <button

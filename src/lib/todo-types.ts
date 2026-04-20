@@ -1,34 +1,37 @@
-export type PriorityColor = "red" | "orange" | "yellow" | "green" | "blue";
+export type CategoryColor = "red" | "orange" | "blue" | "yellow" | "green" | "gray";
 
-export interface Priority {
+export interface Category {
   id: string;
   name: string;
-  color: PriorityColor;
+  color: CategoryColor;
+  parentId: string | null;
 }
 
 export interface Task {
   id: string;
   text: string;
-  priorityId: string;
+  categoryId: string;
   done: boolean;
   createdAt: number;
 }
 
-export const COLOR_OPTIONS: { key: PriorityColor; label: string; varName: string }[] = [
+export const COLOR_OPTIONS: { key: CategoryColor; label: string; varName: string }[] = [
   { key: "red", label: "红", varName: "--prio-red" },
   { key: "orange", label: "橙", varName: "--prio-orange" },
+  { key: "blue", label: "蓝", varName: "--prio-blue" },
   { key: "yellow", label: "黄", varName: "--prio-yellow" },
   { key: "green", label: "绿", varName: "--prio-green" },
-  { key: "blue", label: "蓝", varName: "--prio-blue" },
 ];
 
-export const colorVar = (c: PriorityColor) => `hsl(var(--prio-${c}))`;
-export const colorVarSoft = (c: PriorityColor) => `hsl(var(--prio-${c}) / 0.15)`;
+export const DEFAULT_COLORS: CategoryColor[] = ["red", "orange", "blue", "yellow", "green"];
 
-export const DEFAULT_PRIORITIES: Priority[] = [
-  { id: "p1", name: "紧急 BUG", color: "red" },
-  { id: "p2", name: "需求优化", color: "orange" },
-  { id: "p3", name: "长期规划", color: "blue" },
-  { id: "p4", name: "细节调整", color: "green" },
-  { id: "p5", name: "待讨论", color: "yellow" },
+export const colorVar = (c: CategoryColor) => `hsl(var(--prio-${c}))`;
+export const colorVarSoft = (c: CategoryColor) => `hsl(var(--prio-${c}) / 0.15)`;
+
+export const DEFAULT_CATEGORIES: Category[] = [
+  { id: "p1", name: "工作", color: "red", parentId: null },
+  { id: "p2", name: "学习", color: "orange", parentId: null },
+  { id: "p3", name: "生活", color: "blue", parentId: null },
+  { id: "p4", name: "健康", color: "yellow", parentId: null },
+  { id: "p5", name: "其他", color: "green", parentId: null },
 ];

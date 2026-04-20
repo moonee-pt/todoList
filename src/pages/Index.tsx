@@ -4,23 +4,26 @@ import { useTheme } from "@/hooks/useTheme";
 import { FilterBar } from "@/components/todo/FilterBar";
 import { TaskList } from "@/components/todo/TaskList";
 import { AddTaskBar } from "@/components/todo/AddTaskBar";
-import { PrioritySettings } from "@/components/todo/PrioritySettings";
+import { CategorySettings } from "@/components/todo/CategorySettings";
+import { CopyDialog } from "@/components/todo/CopyDialog";
 import { ListTodo, CheckCircle2 } from "lucide-react";
 
 type Tab = "todo" | "done";
 
 const Index = () => {
   const {
-    priorities,
+    categories,
     tasks,
     addTask,
     toggleTask,
     deleteTask,
     updateTask,
     reorderTasks,
-    upsertPriority,
-    removePriority,
-    reorderPriorities,
+    upsertCategory,
+    removeCategory,
+    reorderCategories,
+    addSubCategory,
+    importData,
   } = useTodoStore();
 
   const { theme, toggle: toggleTheme } = useTheme();
@@ -28,30 +31,32 @@ const Index = () => {
   const [tab, setTab] = useState<Tab>("todo");
   const [filter, setFilter] = useState<string | "all">("all");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [copyOpen, setCopyOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<{
     id: string;
     text: string;
-    priorityId: string;
+    categoryId: string;
   } | null>(null);
 
   const visible = useMemo(() => {
     return tasks.filter((t) => {
       if (tab === "todo" && t.done) return false;
       if (tab === "done" && !t.done) return false;
-      if (filter !== "all" && t.priorityId !== filter) return false;
+      if (filter !== "all" && t.categoryId !== filter) return false;
       return true;
     });
   }, [tasks, tab, filter]);
 
-  const groupByPriority = filter === "all";
+  const groupByCategory = filter === "all";
 
   return (
     <div className="min-h-screen flex flex-col max-w-md mx-auto relative">
       <FilterBar
-        priorities={priorities}
+        categories={categories}
         selected={filter}
         onSelect={setFilter}
         onOpenSettings={() => setSettingsOpen(true)}
+        onOpenCopy={() => setCopyOpen(true)}
         theme={theme}
         onToggleTheme={toggleTheme}
       />
@@ -59,8 +64,8 @@ const Index = () => {
       <main className="flex-1 pb-44">
         <TaskList
           tasks={visible}
-          priorities={priorities}
-          groupByPriority={groupByPriority}
+          categories={categories}
+          groupByCategory={groupByCategory}
           onToggle={toggleTask}
           onDelete={deleteTask}
           onEdit={updateTask}
@@ -72,16 +77,16 @@ const Index = () => {
 
       <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto">
         <AddTaskBar
-          priorities={priorities}
+          categories={categories}
           editingTask={editingTask}
           onAdd={addTask}
-          onUpdate={(id, text, priorityId) => {
+          onUpdate={(id, text, categoryId) => {
             updateTask(id, text);
-            if (priorities.find((p) => p.id === priorityId)) {
+            if (categories.find((p) => p.id === categoryId)) {
               const task = tasks.find((t) => t.id === id);
-              if (task && task.priorityId !== priorityId) {
+              if (task && task.categoryId !== categoryId) {
                 deleteTask(id);
-                addTask(text, priorityId);
+                addTask(text, categoryId);
               }
             }
             setEditingTask(null);
@@ -110,13 +115,22 @@ const Index = () => {
         </nav>
       </div>
 
-      <PrioritySettings
+      <CategorySettings
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
-        priorities={priorities}
-        onUpsert={upsertPriority}
-        onRemove={removePriority}
-        onReorder={reorderPriorities}
+        categories={categories}
+        onUpsert={upsertCategory}
+        onRemove={removeCategory}
+        onReorder={reorderCategories}
+        onAddSubCategory={addSubCategory}
+      />
+
+      <CopyDialog
+        open={copyOpen}
+        onOpenChange={setCopyOpen}
+        categories={categories}
+        tasks={tasks}
+        onImport={importData}
       />
     </div>
   );

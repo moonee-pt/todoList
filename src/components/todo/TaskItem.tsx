@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Task, Priority, colorVar } from "@/lib/todo-types";
+import { Task, Category, colorVar } from "@/lib/todo-types";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Check, Trash2, Edit2 } from "lucide-react";
@@ -16,28 +16,32 @@ import {
 
 interface Props {
   task: Task;
-  priority?: Priority;
+  category?: Category;
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
   onEdit: (id: string, text: string) => void;
-  onStartEdit: (task: { id: string; text: string; priorityId: string }) => void;
+  onStartEdit: (task: { id: string; text: string; categoryId: string }) => void;
 }
 
-export const TaskItem = ({ task, priority, onToggle, onDelete, onEdit, onStartEdit }: Props) => {
+export const TaskItem = ({ task, category, onToggle, onDelete, onEdit, onStartEdit }: Props) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
+    transition: {
+      duration: 200,
+      easing: "cubic-bezier(0.2, 0, 0, 1)",
+    },
   });
 
   const [isLeaving, setIsLeaving] = useState(false);
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 10 : "auto",
+    transition: isDragging ? "transform 200ms cubic-bezier(0.2, 0, 0, 1)" : transition,
+    opacity: isDragging ? 0.95 : 1,
+    zIndex: isDragging ? 999 : "auto",
   };
 
-  const color = priority?.color ?? "blue";
+  const color = category?.color ?? "blue";
 
   const handleToggle = () => {
     setIsLeaving(true);
@@ -57,14 +61,17 @@ export const TaskItem = ({ task, priority, onToggle, onDelete, onEdit, onStartEd
         style={style}
         {...attributes}
         {...listeners}
-        className="group relative flex items-center gap-3 bg-card border border-border/70 rounded-2xl px-4 py-3 shadow-soft transition-all duration-300 touch-none"
+        className={`group relative flex items-center bg-card border border-border/70 rounded-2xl pl-4 pr-3 py-3 transition-all duration-200 touch-none ${
+          isDragging
+            ? "shadow-xl scale-[1.02] cursor-grabbing"
+            : "shadow-soft cursor-grab hover:shadow-md hover:border-border"
+        }`}
       >
         <button
           onClick={(e) => {
             e.stopPropagation();
             handleToggle();
           }}
-          onPointerDown={(e) => e.stopPropagation()}
           className="h-6 w-6 rounded-full border-2 grid place-items-center shrink-0 transition-all active:scale-90 duration-200"
           style={{
             borderColor: colorVar(color),
@@ -75,9 +82,9 @@ export const TaskItem = ({ task, priority, onToggle, onDelete, onEdit, onStartEd
           {task.done && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />}
         </button>
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 ml-3">
           <p
-            className={`text-sm leading-relaxed break-words whitespace-pre-wrap transition-all duration-300 pr-1 ${
+            className={`text-sm leading-relaxed break-words whitespace-pre-wrap transition-all duration-300 ${
               task.done ? "text-muted-foreground" : "text-foreground"
             }`}
           >
@@ -92,11 +99,10 @@ export const TaskItem = ({ task, priority, onToggle, onDelete, onEdit, onStartEd
               onStartEdit({
                 id: task.id,
                 text: task.text,
-                priorityId: task.priorityId,
+                categoryId: task.categoryId,
               });
             }}
-            onPointerDown={(e) => e.stopPropagation()}
-            className="text-muted-foreground/50 hover:text-primary p-1.5 rounded-lg hover:bg-primary/10 transition duration-200"
+            className="text-muted-foreground/50 hover:text-primary p-1 rounded-lg hover:bg-primary/10 transition duration-200"
             aria-label="编辑"
           >
             <Edit2 className="h-4 w-4" />
@@ -106,8 +112,7 @@ export const TaskItem = ({ task, priority, onToggle, onDelete, onEdit, onStartEd
             <AlertDialogTrigger asChild>
               <button
                 onClick={(e) => e.stopPropagation()}
-                onPointerDown={(e) => e.stopPropagation()}
-                className="text-muted-foreground/50 hover:text-destructive p-1.5 rounded-lg hover:bg-destructive/10 transition-all duration-200 md:opacity-0 md:group-hover:opacity-100"
+                className="text-muted-foreground/50 hover:text-destructive p-1 rounded-lg hover:bg-destructive/10 transition-all duration-200 md:opacity-0 md:group-hover:opacity-100"
                 aria-label="删除"
               >
                 <Trash2 className="h-4 w-4" />

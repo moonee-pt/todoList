@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
-import { DEFAULT_PRIORITIES, Priority, Task } from "@/lib/todo-types";
+import { DEFAULT_CATEGORIES, Category, Task } from "@/lib/todo-types";
 
 const KEY_TASKS = "todo.tasks.v1";
-const KEY_PRIOS = "todo.priorities.v1";
+const KEY_CATEGORIES = "todo.categories.v1";
+const KEY_OLD_PRIORITIES = "todo.priorities.v1";
 
 function load<T>(key: string, fallback: T): T {
   try {
@@ -13,24 +14,78 @@ function load<T>(key: string, fallback: T): T {
   }
 }
 
+function migrateData(): {
+  categories: Category[];
+  tasks: Task[];
+} {
+  const oldPriorities = localStorage.getItem(KEY_OLD_PRIORITIES);
+  const oldTasks = localStorage.getItem(KEY_TASKS);
+  const hasNewCategories = localStorage.getItem(KEY_CATEGORIES);
+
+  if (hasNewCategories) {
+    return {
+      categories: load<Category[]>(KEY_CATEGORIES, DEFAULT_CATEGORIES),
+      tasks: load<Task[]>(KEY_TASKS, []),
+    };
+  }
+
+  let categories: Category[] = DEFAULT_CATEGORIES;
+  let tasks: Task[] = [];
+
+  if (oldPriorities) {
+    try {
+      const priorities = JSON.parse(oldPriorities) as any[];
+      categories = priorities.map((p) => ({
+        ...p,
+        parentId: null,
+      }));
+    } catch {}
+  }
+
+  if (oldTasks) {
+    try {
+      tasks = JSON.parse(oldTasks).map((t: any) => {
+        if (t.priorityId && !t.categoryId) {
+          return { ...t, categoryId: t.priorityId };
+        }
+        return t;
+      });
+    } catch {}
+  }
+
+  return { categories, tasks };
+}
+
 export function useTodoStore() {
-  const [priorities, setPriorities] = useState<Priority[]>(() =>
-    load<Priority[]>(KEY_PRIOS, DEFAULT_PRIORITIES)
-  );
-  const [tasks, setTasks] = useState<Task[]>(() => load<Task[]>(KEY_TASKS, []));
+  const [categories, setCategories] = useState<Category[]>(() => {
+    const data = migrateData();
+    const hasNewCategories = localStorage.getItem(KEY_CATEGORIES);
+    if (!hasNewCategories) {
+      localStorage.setItem(KEY_CATEGORIES, JSON.stringify(data.categories));
+    }
+    return data.categories;
+  });
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    const data = migrateData();
+    return data.tasks;
+  });
 
   useEffect(() => {
-    localStorage.setItem(KEY_PRIOS, JSON.stringify(priorities));
-  }, [priorities]);
+    setTasks((prev) => prev.filter((t) => categories.some((c) => c.id === t.categoryId)));
+  }, [categories]);
+
+  useEffect(() => {
+    localStorage.setItem(KEY_CATEGORIES, JSON.stringify(categories));
+  }, [categories]);
 
   useEffect(() => {
     localStorage.setItem(KEY_TASKS, JSON.stringify(tasks));
   }, [tasks]);
 
-  const addTask = useCallback((text: string, priorityId: string) => {
+  const addTask = useCallback((text: string, categoryId: string) => {
     if (!text.trim()) return;
     setTasks((prev) => [
-      { id: crypto.randomUUID(), text: text.trim(), priorityId, done: false, createdAt: Date.now() },
+      { id: crypto.randomUUID(), text: text.trim(), categoryId, done: false, createdAt: Date.now() },
       ...prev,
     ]);
   }, []);
@@ -71,8 +126,8 @@ export function useTodoStore() {
     });
   }, []);
 
-  const reorderPriorities = useCallback((fromId: string, toId: string) => {
-    setPriorities((prev) => {
+  const reorderCategories = useCallback((fromId: string, toId: string) => {
+    setCategories((prev) => {
       const fromIdx = prev.findIndex((p) => p.id === fromId);
       const toIdx = prev.findIndex((p) => p.id === toId);
       if (fromIdx < 0 || toIdx < 0) return prev;
@@ -83,8 +138,8 @@ export function useTodoStore() {
     });
   }, []);
 
-  const upsertPriority = useCallback((p: Priority) => {
-    setPriorities((prev) => {
+  const upsertCategory = useCallback((p: Category) => {
+    setCategories((prev) => {
       const idx = prev.findIndex((x) => x.id === p.id);
       if (idx < 0) return [...prev, p];
       const next = [...prev];
@@ -93,31 +148,50 @@ export function useTodoStore() {
     });
   }, []);
 
-  const removePriority = useCallback((id: string) => {
-    setPriorities((prev) => {
+  const removeCategory = useCallback((id: string) => {
+    setCategories((prev) => {
       if (prev.length <= 1) return prev;
       return prev.filter((p) => p.id !== id);
     });
     
     setTasks((prev) => {
-      const remaining = priorities.filter((p) => p.id !== id);
+      const remaining = categories.filter((p) => p.id !== id);
       const fallback = remaining[0]?.id;
       if (!fallback) return prev;
-      return prev.map((t) => (t.priorityId === id ? { ...t, priorityId: fallback } : t));
+      return prev.map((t) => (t.categoryId === id ? { ...t, categoryId: fallback } : t));
     });
-  }, [priorities]);
+  }, [categories]);
+
+  const addSubCategory = useCallback((parentId: string) => {
+    setCategories((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        name: "子文件夹",
+        color: "gray",
+        parentId,
+      },
+    ]);
+  }, []);
+
+  const importData = useCallback((newCategories: Category[], newTasks: Task[]) => {
+    setCategories(newCategories);
+    setTasks(newTasks);
+  }, []);
 
   return {
-    priorities,
+    categories,
     tasks,
     addTask,
     toggleTask,
     deleteTask,
     updateTask,
     reorderTasks,
-    upsertPriority,
-    removePriority,
-    reorderPriorities,
-    setPriorities,
+    upsertCategory,
+    removeCategory,
+    reorderCategories,
+    setCategories,
+    addSubCategory,
+    importData,
   };
 }

@@ -1,21 +1,21 @@
 import { useState, useEffect } from "react";
-import { Priority, colorVar } from "@/lib/todo-types";
+import { Category, colorVar } from "@/lib/todo-types";
 import { Plus, ChevronUp, Check, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 
 interface Props {
-  priorities: Priority[];
-  defaultPriorityId?: string;
-  editingTask?: { id: string; text: string; priorityId: string } | null;
-  onAdd: (text: string, priorityId: string) => void;
-  onUpdate?: (id: string, text: string, priorityId: string) => void;
+  categories: Category[];
+  defaultCategoryId?: string;
+  editingTask?: { id: string; text: string; categoryId: string } | null;
+  onAdd: (text: string, categoryId: string) => void;
+  onUpdate?: (id: string, text: string, categoryId: string) => void;
   onCancelEdit?: () => void;
 }
 
-export const AddTaskBar = ({ priorities, defaultPriorityId, editingTask, onAdd, onUpdate, onCancelEdit }: Props) => {
+export const AddTaskBar = ({ categories, defaultCategoryId, editingTask, onAdd, onUpdate, onCancelEdit }: Props) => {
   const [text, setText] = useState("");
-  const [pid, setPid] = useState(defaultPriorityId ?? priorities[0]?.id ?? "");
+  const [pid, setPid] = useState(defaultCategoryId ?? categories[0]?.id ?? "");
   const [open, setOpen] = useState(false);
 
   const isEditing = !!editingTask;
@@ -23,7 +23,7 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, editingTask, onAdd, 
   useEffect(() => {
     if (editingTask) {
       setText(editingTask.text);
-      setPid(editingTask.priorityId);
+      setPid(editingTask.categoryId);
     }
   }, [editingTask?.id]);
 
@@ -35,8 +35,8 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, editingTask, onAdd, 
     }
   }, [text]);
 
-  const currentPid = priorities.find((p) => p.id === pid) ? pid : priorities[0]?.id ?? "";
-  const current = priorities.find((p) => p.id === currentPid);
+  const currentPid = categories.find((p) => p.id === pid) ? pid : categories[0]?.id ?? "";
+  const current = categories.find((p) => p.id === currentPid);
 
   const submit = () => {
     if (!text.trim() || !currentPid) return;
@@ -46,7 +46,7 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, editingTask, onAdd, 
       onAdd(text, currentPid);
     }
     setText("");
-    setPid(defaultPriorityId ?? priorities[0]?.id ?? "");
+    setPid(defaultCategoryId ?? categories[0]?.id ?? "");
   };
 
   return (
@@ -70,30 +70,40 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, editingTask, onAdd, 
           <PopoverContent 
             side="top" 
             align="start" 
-            className="w-36 p-1 rounded-xl"
+            className="w-44 p-1 rounded-xl"
             sideOffset={8}
           >
             <div className="flex flex-col gap-0.5">
-              {priorities.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => {
-                    setPid(p.id);
-                    setOpen(false);
-                  }}
-                  className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs hover:bg-accent transition-colors ${
-                    pid === p.id ? "bg-accent" : ""
-                  }`}
-                  style={{ color: colorVar(p.color) }}
-                >
-                  <span
-                    className="h-1.5 w-1.5 rounded-full shrink-0"
-                    style={{ backgroundColor: colorVar(p.color) }}
-                  />
-                  {p.name}
-                  {pid === p.id && <Check className="h-3 w-3 ml-auto" />}
-                </button>
-              ))}
+              {(() => {
+                const renderTree = (parentId: string | null, depth: number = 0): JSX.Element[] => {
+                  const children = categories.filter((c) => c.parentId === parentId);
+                  return children.flatMap((c) => [
+                    <button
+                      key={c.id}
+                      onClick={() => {
+                        setPid(c.id);
+                        setOpen(false);
+                      }}
+                      className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs hover:bg-accent transition-colors ${
+                        pid === c.id ? "bg-accent" : ""
+                      }`}
+                      style={{ 
+                        color: colorVar(c.color),
+                        paddingLeft: `${10 + depth * 12}px`
+                      }}
+                    >
+                      <span
+                        className="h-1.5 w-1.5 rounded-full shrink-0"
+                        style={{ backgroundColor: colorVar(c.color) }}
+                      />
+                      {c.name}
+                      {pid === c.id && <Check className="h-3 w-3 ml-auto" />}
+                    </button>,
+                    ...renderTree(c.id, depth + 1),
+                  ]);
+                };
+                return renderTree(null);
+              })()}
             </div>
           </PopoverContent>
         </Popover>
@@ -115,7 +125,7 @@ export const AddTaskBar = ({ priorities, defaultPriorityId, editingTask, onAdd, 
               onClick={() => {
                 onCancelEdit?.();
                 setText("");
-                setPid(defaultPriorityId ?? priorities[0]?.id ?? "");
+                setPid(defaultCategoryId ?? categories[0]?.id ?? "");
               }}
               className="h-9 w-9 grid place-items-center rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-all -ml-[42px]"
               aria-label="取消"
