@@ -66,10 +66,10 @@ export const TaskItem = ({ task, category, onToggle, onDelete, onEdit, onStartEd
       >
         <button
           {...listeners}
-          className="touch-none text-muted-foreground/40 hover:text-foreground p-1.5 ml-2 cursor-grab active:cursor-grabbing"
+          className="touch-none text-muted-foreground/40 hover:text-foreground p-1 ml-1 cursor-grab active:cursor-grabbing"
           aria-label="拖拽排序"
         >
-          <GripVertical className="h-4 w-4" />
+          <GripVertical className="h-3.5 w-3.5" />
         </button>
 
         <button
@@ -87,7 +87,7 @@ export const TaskItem = ({ task, category, onToggle, onDelete, onEdit, onStartEd
           {task.done && <Check className="h-3.5 w-3.5 text-white" strokeWidth={3} />}
         </button>
 
-        <div className="flex-1 min-w-0 ml-3">
+        <div className="flex-1 min-w-0 ml-2">
           <p
             className={`text-sm leading-relaxed break-words whitespace-pre-wrap transition-all duration-300 ${
               task.done ? "text-muted-foreground" : "text-foreground"

@@ -75,24 +75,24 @@ const Row = ({
       style={style}
       className="border border-border bg-card rounded-2xl p-3 flex flex-col gap-3 shadow-soft"
     >
-      <div className="flex items-center gap-2" style={{ marginLeft: `${depth * 16}px` }}>
+      <div className="flex items-center gap-1" style={{ marginLeft: `${depth * 16}px` }}>
         {hasChildren && (
           <button
             onClick={onToggleExpand}
-            className="text-muted-foreground/60 hover:text-foreground p-1 transition-transform"
+            className="text-muted-foreground/60 hover:text-foreground p-0.5 transition-transform -m-0.5"
             style={{ transform: expanded ? "rotate(90deg)" : "rotate(0deg)" }}
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3.5 w-3.5" />
           </button>
         )}
-        {depth > 0 && !hasChildren && <div className="w-6" />}
+        {depth > 0 && !hasChildren && <div className="w-4" />}
         <button
           {...attributes}
           {...listeners}
           className="touch-none text-muted-foreground/60 hover:text-foreground p-1 cursor-grab active:cursor-grabbing"
           aria-label="拖拽排序"
         >
-          <GripVertical className="h-5 w-5" />
+          <GripVertical className="h-4 w-4" />
         </button>
         <span
           className="h-3 w-3 rounded-full shrink-0"
