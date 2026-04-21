@@ -1,27 +1,20 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { DEFAULT_CATEGORIES, Category, Task } from "@/lib/todo-types";
 
 const KEY_TASKS = "todo.tasks.v1";
 const KEY_CATEGORIES = "todo.categories.v1";
 const KEY_OLD_PRIORITIES = "todo.priorities.v1";
 
-function load<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
 export function useTodoStore() {
   const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [initialized, setInitialized] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string>("");
+  const firstLoadDone = useRef(false);
 
   useEffect(() => {
+    if (firstLoadDone.current) return;
+
     const logs: string[] = [];
     const log = (msg: string) => {
       console.log("[DATA_RESCUE]", msg);
@@ -108,20 +101,23 @@ export function useTodoStore() {
     setDebugInfo(logs.join("\n"));
     setCategories(finalCategories);
     setTasks(finalTasks);
-    setInitialized(true);
+    firstLoadDone.current = true;
 
+    localStorage.setItem(KEY_CATEGORIES, JSON.stringify(finalCategories));
     localStorage.setItem(KEY_TASKS, JSON.stringify(finalTasks));
+
+    log("数据已写回 localStorage，修复完成！");
   }, []);
 
   useEffect(() => {
-    if (!initialized) return;
+    if (!firstLoadDone.current) return;
     localStorage.setItem(KEY_CATEGORIES, JSON.stringify(categories));
-  }, [categories, initialized]);
+  }, [categories]);
 
   useEffect(() => {
-    if (!initialized) return;
+    if (!firstLoadDone.current) return;
     localStorage.setItem(KEY_TASKS, JSON.stringify(tasks));
-  }, [tasks, initialized]);
+  }, [tasks]);
 
   const addTask = useCallback((text: string, categoryId: string) => {
     if (!text.trim()) return;
