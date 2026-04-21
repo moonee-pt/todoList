@@ -15,7 +15,7 @@ interface Props {
 
 export const AddTaskBar = ({ categories, defaultCategoryId, editingTask, onAdd, onUpdate, onCancelEdit }: Props) => {
   const [text, setText] = useState("");
-  const [pid, setPid] = useState(defaultCategoryId ?? categories[0]?.id ?? "");
+  const [pid, setPid] = useState("");
   const [open, setOpen] = useState(false);
 
   const isEditing = !!editingTask;
@@ -24,8 +24,10 @@ export const AddTaskBar = ({ categories, defaultCategoryId, editingTask, onAdd, 
     if (editingTask) {
       setText(editingTask.text);
       setPid(editingTask.categoryId);
+    } else {
+      setPid(defaultCategoryId ?? categories[0]?.id ?? "");
     }
-  }, [editingTask?.id]);
+  }, [editingTask?.id, defaultCategoryId, categories]);
 
   useEffect(() => {
     const textarea = document.querySelector("textarea");
@@ -35,18 +37,16 @@ export const AddTaskBar = ({ categories, defaultCategoryId, editingTask, onAdd, 
     }
   }, [text]);
 
-  const currentPid = categories.find((p) => p.id === pid) ? pid : categories[0]?.id ?? "";
-  const current = categories.find((p) => p.id === currentPid);
+  const current = categories.find((p) => p.id === pid) ?? categories[0];
 
   const submit = () => {
-    if (!text.trim() || !currentPid) return;
+    if (!text.trim() || !current) return;
     if (isEditing && onUpdate && editingTask) {
-      onUpdate(editingTask.id, text, currentPid);
+      onUpdate(editingTask.id, text, current.id);
     } else {
-      onAdd(text, currentPid);
+      onAdd(text, current.id);
     }
     setText("");
-    setPid(defaultCategoryId ?? categories[0]?.id ?? "");
   };
 
   return (

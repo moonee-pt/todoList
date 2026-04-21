@@ -251,8 +251,8 @@ export const CopyDialog = ({ open, onOpenChange, categories, tasks, onImport }: 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[90vw] max-h-[85vh] rounded-2xl flex flex-col gap-3 p-4">
-        <Tabs defaultValue="copy" className="flex-1 flex flex-col">
+      <DialogContent className="max-w-[90vw] max-h-[85vh] rounded-2xl flex flex-col gap-3 p-4 min-h-0 overflow-hidden">
+          <Tabs defaultValue="copy" className="flex-1 flex flex-col min-h-0 overflow-hidden">
           <DialogHeader className="flex flex-row items-center justify-between">
             <DialogTitle className="text-left text-base">备份 & 恢复</DialogTitle>
             <TabsList className="h-8 grid grid-cols-2">
@@ -267,8 +267,8 @@ export const CopyDialog = ({ open, onOpenChange, categories, tasks, onImport }: 
             </TabsList>
           </DialogHeader>
 
-          <TabsContent value="copy" className="flex-1 flex flex-col gap-0 mt-0">
-            <div className="flex-1 overflow-auto p-3 bg-secondary/40 rounded-xl border-2 border-transparent min-h-[250px] mb-3">
+          <TabsContent value="copy" className="flex-1 flex flex-col gap-0 mt-0 overflow-hidden min-h-0">
+            <div className="flex-1 overflow-auto p-3 bg-secondary/40 rounded-xl border-2 border-transparent mb-3">
               <pre className="text-sm leading-snug whitespace-pre-wrap select-all m-0 font-mono">
                 {generateText()}
               </pre>
@@ -286,9 +286,10 @@ export const CopyDialog = ({ open, onOpenChange, categories, tasks, onImport }: 
             </div>
           </TabsContent>
 
-          <TabsContent value="paste" className="flex-1 flex flex-col gap-0 mt-0">
-            <div className="flex-1 overflow-auto p-3 bg-secondary/40 rounded-xl border-2 border-dashed border-border/60 min-h-[250px] mb-3">
+          <TabsContent value="paste" className="flex-1 flex flex-col gap-0 mt-0 overflow-hidden min-h-0">
+            <div className="flex-1 overflow-auto p-3 bg-secondary/40 rounded-xl border-2 border-dashed border-border/60 mb-3">
               <Textarea
+                className="h-full resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
                 value={pasteText}
                 onChange={(e) => setPasteText(e.target.value)}
                 onKeyDown={(e) => {
@@ -361,7 +362,7 @@ export const CopyDialog = ({ open, onOpenChange, categories, tasks, onImport }: 
             </RadioGroup>
 
             {warnings.length > 0 && (
-              <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-lg p-2.5 mb-2">
+              <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-lg p-2.5 mb-2 shrink-0">
                 {warnings.map((w, i) => (
                   <p key={i} className="text-[11px] text-amber-700 dark:text-amber-400 leading-relaxed">
                     {w}

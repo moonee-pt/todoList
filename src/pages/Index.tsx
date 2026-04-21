@@ -78,6 +78,7 @@ const Index = () => {
       <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto">
         <AddTaskBar
           categories={categories}
+          defaultCategoryId={filter === "all" ? undefined : filter}
           editingTask={editingTask}
           onAdd={addTask}
           onUpdate={(id, text, categoryId) => {
