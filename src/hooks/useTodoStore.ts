@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { DEFAULT_CATEGORIES, Category, Task } from "@/lib/todo-types";
+import { DEFAULT_CATEGORIES, Category, Task, COLOR_OPTIONS } from "@/lib/todo-types";
 
 const KEY_TASKS = "todo.tasks.v1";
 const KEY_CATEGORIES = "todo.categories.v1";
@@ -95,31 +95,37 @@ export function useTodoStore() {
     });
   }, []);
 
-  const addCategory = useCallback((name: string, color: string, parentId: string | null = null) => {
-    setCategories((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), name, color: parentId ? "gray" : color, parentId },
-    ]);
+  const upsertCategory = useCallback((category: Category) => {
+    setCategories((prev) => {
+      const existing = prev.find((c) => c.id === category.id);
+      if (existing) {
+        return prev.map((c) => (c.id === category.id ? category : c));
+      }
+      return [...prev, category];
+    });
   }, []);
 
-  const updateCategory = useCallback((id: string, name: string, color?: string) => {
-    setCategories((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, name, color: color ?? c.color } : c))
-    );
-  }, []);
-
-  const deleteCategory = useCallback((id: string) => {
+  const removeCategory = useCallback((id: string) => {
     setCategories((prev) => prev.filter((c) => c.id !== id && c.parentId !== id));
   }, []);
 
-  const reorderCategories = useCallback((from: number, to: number) => {
+  const reorderCategories = useCallback((fromId: string, toId: string) => {
     setCategories((prev) => {
       const roots = prev.filter((c) => !c.parentId);
       const subs = prev.filter((c) => c.parentId);
-      const [item] = roots.splice(from, 1);
-      roots.splice(to, 0, item);
+      const fromIndex = roots.findIndex((c) => c.id === fromId);
+      const toIndex = roots.findIndex((c) => c.id === toId);
+      const [item] = roots.splice(fromIndex, 1);
+      roots.splice(toIndex, 0, item);
       return [...roots, ...subs];
     });
+  }, []);
+
+  const addSubCategory = useCallback((parentId: string) => {
+    setCategories((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), name: "", color: "gray", parentId },
+    ]);
   }, []);
 
   const importData = useCallback((newCategories: Category[], newTasks: Task[]) => {
@@ -135,10 +141,10 @@ export function useTodoStore() {
     deleteTask,
     updateTask,
     reorderTasks,
-    addCategory,
-    updateCategory,
-    deleteCategory,
+    upsertCategory,
+    removeCategory,
     reorderCategories,
+    addSubCategory,
     importData,
   };
 }
