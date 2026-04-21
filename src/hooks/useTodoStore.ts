@@ -8,18 +8,10 @@ const KEY_OLD_PRIORITIES = "todo.priorities.v1";
 export function useTodoStore() {
   const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [showDebug, setShowDebug] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<string>("");
   const firstLoadDone = useRef(false);
 
   useEffect(() => {
     if (firstLoadDone.current) return;
-
-    const logs: string[] = [];
-    const log = (msg: string) => {
-      console.log("[INIT]", msg);
-      logs.push(msg);
-    };
 
     let finalCategories = DEFAULT_CATEGORIES;
     let finalTasks: Task[] = [];
@@ -30,7 +22,6 @@ export function useTodoStore() {
 
       if (catRaw) {
         finalCategories = JSON.parse(catRaw);
-        log(`✓ 加载分类: ${finalCategories.length} 个`);
       }
 
       if (taskRaw) {
@@ -40,7 +31,6 @@ export function useTodoStore() {
             ...t,
             categoryId: t.categoryId || t.priorityId,
           }));
-          log(`✓ 加载任务: ${finalTasks.length} 个`);
         }
       }
 
@@ -51,22 +41,16 @@ export function useTodoStore() {
             ...t,
             categoryId: t.categoryId || t.priorityId,
           }));
-          log(`✓ 从旧版迁移: ${finalTasks.length} 个任务`);
         }
       }
     } catch (e) {
-      log(`✗ 加载错误: ${e}`);
+      console.error("[INIT] 加载错误:", e);
     }
-
-    log(`=== 最终状态 ===`);
-    log(`分类: ${finalCategories.length} 个`);
-    log(`任务: ${finalTasks.length} 个`);
 
     firstLoadDone.current = true;
     localStorage.setItem(KEY_CATEGORIES, JSON.stringify(finalCategories));
     localStorage.setItem(KEY_TASKS, JSON.stringify(finalTasks));
 
-    setDebugInfo(logs.join("\n"));
     setCategories(finalCategories);
     setTasks(finalTasks);
   }, []);
@@ -156,8 +140,5 @@ export function useTodoStore() {
     deleteCategory,
     reorderCategories,
     importData,
-    debugInfo,
-    showDebug,
-    setShowDebug,
   };
 }

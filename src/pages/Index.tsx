@@ -6,9 +6,7 @@ import { TaskList } from "@/components/todo/TaskList";
 import { AddTaskBar } from "@/components/todo/AddTaskBar";
 import { CategorySettings } from "@/components/todo/CategorySettings";
 import { CopyDialog } from "@/components/todo/CopyDialog";
-import { ListTodo, CheckCircle2, AlertTriangle, X } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { ListTodo, CheckCircle2 } from "lucide-react";
 
 type Tab = "todo" | "done";
 
@@ -17,9 +15,6 @@ const Index = () => {
     categories,
     tasks,
     addTask,
-    debugInfo,
-    showDebug,
-    setShowDebug,
     toggleTask,
     deleteTask,
     updateTask,
@@ -137,30 +132,6 @@ const Index = () => {
         tasks={tasks}
         onImport={importData}
       />
-
-      <button
-        onClick={() => setShowDebug(true)}
-        className="fixed top-4 right-4 w-8 h-8 rounded-full bg-background/80 backdrop-blur flex items-center justify-center z-50 opacity-30 hover:opacity-100 transition-opacity"
-      >
-        <AlertTriangle className="h-4 w-4 text-amber-500" />
-      </button>
-
-      <Dialog open={showDebug} onOpenChange={setShowDebug}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="text-sm">🔍 数据恢复日志</DialogTitle>
-          </DialogHeader>
-          <pre className="bg-secondary/50 p-3 rounded-lg text-[10px] font-mono overflow-auto max-h-[60vh] whitespace-pre-wrap break-all">
-            {debugInfo}
-          </pre>
-          <div className="flex justify-end">
-            <Button size="sm" onClick={() => setShowDebug(false)}>
-              <X className="h-3.5 w-3.5 mr-1.5" />
-              关闭
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
