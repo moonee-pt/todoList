@@ -14,99 +14,114 @@ function load<T>(key: string, fallback: T): T {
   }
 }
 
-function migrateData(): {
-  categories: Category[];
-  tasks: Task[];
-} {
-  const oldPriorities = localStorage.getItem(KEY_OLD_PRIORITIES);
-  const oldTasks = localStorage.getItem(KEY_TASKS);
-  const hasNewCategories = localStorage.getItem(KEY_CATEGORIES);
-
-  if (hasNewCategories) {
-    return {
-      categories: load<Category[]>(KEY_CATEGORIES, DEFAULT_CATEGORIES),
-      tasks: load<Task[]>(KEY_TASKS, []),
-    };
-  }
-
-  let categories: Category[] = DEFAULT_CATEGORIES;
-  let tasks: Task[] = [];
-
-  if (oldPriorities) {
-    try {
-      const priorities = JSON.parse(oldPriorities) as any[];
-      categories = priorities.map((p) => ({
-        ...p,
-        parentId: null,
-      }));
-    } catch {}
-  }
-
-  if (oldTasks) {
-    try {
-      tasks = JSON.parse(oldTasks).map((t: any) => {
-        if (t.priorityId && !t.categoryId) {
-          return { ...t, categoryId: t.priorityId };
-        }
-        return t;
-      });
-    } catch {}
-  }
-
-  return { categories, tasks };
-}
-
 export function useTodoStore() {
   const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [initialized, setInitialized] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string>("");
 
   useEffect(() => {
-    const data = migrateData();
-    const hasNewCategories = localStorage.getItem(KEY_CATEGORIES);
-    if (!hasNewCategories) {
-      localStorage.setItem(KEY_CATEGORIES, JSON.stringify(data.categories));
-    }
+    const logs: string[] = [];
+    const log = (msg: string) => {
+      console.log("[DATA_RESCUE]", msg);
+      logs.push(msg);
+    };
 
-    let finalTasks = data.tasks;
+    log("=== 开始数据恢复 ===");
+    log("LocalStorage 条目总数: " + localStorage.length);
 
-    if (finalTasks.length === 0) {
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.includes("task")) {
-          const raw = localStorage.getItem(key);
-          if (raw) {
-            try {
-              const parsed = JSON.parse(raw);
-              if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].text) {
-                const tasks = parsed.map((t: any) => {
-                  if (t.priorityId && !t.categoryId) {
-                    return { ...t, categoryId: t.priorityId };
-                  }
-                  return t;
-                });
-                if (tasks.length > finalTasks.length) {
-                  finalTasks = tasks;
-                }
-              }
-            } catch {}
-          }
-        }
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key) {
+        const raw = localStorage.getItem(key);
+        const len = raw ? raw.length : 0;
+        log(`找到 Key: ${key} (长度: ${len})`);
       }
     }
 
-    setCategories(data.categories);
+    const catRaw = localStorage.getItem(KEY_CATEGORIES);
+    const taskRaw = localStorage.getItem(KEY_TASKS);
+    const oldPrioRaw = localStorage.getItem(KEY_OLD_PRIORITIES);
+
+    log("");
+    log(`KEY_CATEGORIES 存在: ${!!catRaw}`);
+    log(`KEY_TASKS 存在: ${!!taskRaw}, 内容长度: ${taskRaw?.length || 0}`);
+    log(`KEY_OLD_PRIORITIES 存在: ${!!oldPrioRaw}`);
+
+    let finalCategories: Category[] = DEFAULT_CATEGORIES;
+    let finalTasks: Task[] = [];
+
+    if (catRaw) {
+      try {
+        finalCategories = JSON.parse(catRaw);
+        log(`加载分类成功: ${finalCategories.length} 个`);
+      } catch (e) {
+        log(`解析分类失败: ${e}`);
+      }
+    }
+
+    let allTaskArrays: { key: string; tasks: Task[] }[] = [];
+
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].text) {
+          const mapped = parsed.map((t: any) => ({
+            ...t,
+            categoryId: t.categoryId || t.priorityId,
+          }));
+          allTaskArrays.push({ key, tasks: mapped });
+          log(`找到任务数组: ${key} => ${mapped.length} 个任务`);
+        }
+      } catch {}
+    }
+
+    if (allTaskArrays.length > 0) {
+      allTaskArrays.sort((a, b) => b.tasks.length - a.tasks.length);
+      const best = allTaskArrays[0];
+      log(`选择任务最多的: ${best.key} => ${best.tasks.length} 个任务`);
+      finalTasks = best.tasks;
+    }
+
+    if (finalTasks.length === 0 && oldPrioRaw && taskRaw) {
+      log("旧优先级数据存在，重新迁移任务...");
+      try {
+        finalTasks = JSON.parse(taskRaw).map((t: any) => ({
+          ...t,
+          categoryId: t.categoryId || t.priorityId,
+        }));
+        log(`从原始数据迁移成功: ${finalTasks.length} 个任务`);
+      } catch {}
+    }
+
+    log("");
+    log(`=== 最终结果 ===`);
+    log(`分类: ${finalCategories.length} 个`);
+    log(`任务: ${finalTasks.length} 个`);
+
+    setDebugInfo(logs.join("\n"));
+    setCategories(finalCategories);
     setTasks(finalTasks);
     setInitialized(true);
+
+    localStorage.setItem(KEY_TASKS, JSON.stringify(finalTasks));
   }, []);
 
   useEffect(() => {
+    if (!initialized) return;
     localStorage.setItem(KEY_CATEGORIES, JSON.stringify(categories));
-  }, [categories]);
+  }, [categories, initialized]);
 
   useEffect(() => {
+    if (!initialized) return;
     localStorage.setItem(KEY_TASKS, JSON.stringify(tasks));
-  }, [tasks]);
+  }, [tasks, initialized]);
 
   const addTask = useCallback((text: string, categoryId: string) => {
     if (!text.trim()) return;
@@ -125,79 +140,44 @@ export function useTodoStore() {
   }, []);
 
   const updateTask = useCallback((id: string, text: string) => {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, text } : t)));
+    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, text: text.trim() } : t)));
   }, []);
 
-  const reorderTasks = useCallback((doneScope: boolean, fromId: string, toId: string) => {
+  const reorderTasks = useCallback((isDone: boolean, from: number, to: number) => {
     setTasks((prev) => {
-      const scope = prev.filter((t) => t.done === doneScope);
-      const others = prev.filter((t) => t.done !== doneScope);
-      const fromIdx = scope.findIndex((t) => t.id === fromId);
-      const toIdx = scope.findIndex((t) => t.id === toId);
-      if (fromIdx < 0 || toIdx < 0) return prev;
-      const next = [...scope];
-      const [moved] = next.splice(fromIdx, 1);
-      next.splice(toIdx, 0, moved);
-      
-      const result: Task[] = [];
-      let scopePtr = 0;
-      for (const t of prev) {
-        if (t.done === doneScope) {
-          result.push(next[scopePtr++]);
-        } else {
-          result.push(t);
-        }
-      }
-      return result;
+      const filtered = prev.filter((t) => t.done === isDone);
+      const rest = prev.filter((t) => t.done !== isDone);
+      const [item] = filtered.splice(from, 1);
+      filtered.splice(to, 0, item);
+      return [...filtered, ...rest];
     });
   }, []);
 
-  const reorderCategories = useCallback((fromId: string, toId: string) => {
-    setCategories((prev) => {
-      const fromIdx = prev.findIndex((p) => p.id === fromId);
-      const toIdx = prev.findIndex((p) => p.id === toId);
-      if (fromIdx < 0 || toIdx < 0) return prev;
-      const next = [...prev];
-      const [moved] = next.splice(fromIdx, 1);
-      next.splice(toIdx, 0, moved);
-      return next;
-    });
-  }, []);
-
-  const upsertCategory = useCallback((p: Category) => {
-    setCategories((prev) => {
-      const idx = prev.findIndex((x) => x.id === p.id);
-      if (idx < 0) return [...prev, p];
-      const next = [...prev];
-      next[idx] = p;
-      return next;
-    });
-  }, []);
-
-  const removeCategory = useCallback((id: string) => {
-    setCategories((prev) => {
-      if (prev.length <= 1) return prev;
-      return prev.filter((p) => p.id !== id);
-    });
-    
-    setTasks((prev) => {
-      const remaining = categories.filter((p) => p.id !== id);
-      const fallback = remaining[0]?.id;
-      if (!fallback) return prev;
-      return prev.map((t) => (t.categoryId === id ? { ...t, categoryId: fallback } : t));
-    });
-  }, [categories]);
-
-  const addSubCategory = useCallback((parentId: string) => {
+  const addCategory = useCallback((name: string, color: string, parentId: string | null = null) => {
     setCategories((prev) => [
       ...prev,
-      {
-        id: crypto.randomUUID(),
-        name: "子文件夹",
-        color: "gray",
-        parentId,
-      },
+      { id: crypto.randomUUID(), name, color: parentId ? "gray" : color, parentId },
     ]);
+  }, []);
+
+  const updateCategory = useCallback((id: string, name: string, color?: string) => {
+    setCategories((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, name, color: color ?? c.color } : c))
+    );
+  }, []);
+
+  const deleteCategory = useCallback((id: string) => {
+    setCategories((prev) => prev.filter((c) => c.id !== id && c.parentId !== id));
+  }, []);
+
+  const reorderCategories = useCallback((from: number, to: number) => {
+    setCategories((prev) => {
+      const roots = prev.filter((c) => !c.parentId);
+      const subs = prev.filter((c) => c.parentId);
+      const [item] = roots.splice(from, 1);
+      roots.splice(to, 0, item);
+      return [...roots, ...subs];
+    });
   }, []);
 
   const importData = useCallback((newCategories: Category[], newTasks: Task[]) => {
@@ -213,11 +193,13 @@ export function useTodoStore() {
     deleteTask,
     updateTask,
     reorderTasks,
-    upsertCategory,
-    removeCategory,
+    addCategory,
+    updateCategory,
+    deleteCategory,
     reorderCategories,
-    setCategories,
-    addSubCategory,
     importData,
+    debugInfo,
+    showDebug,
+    setShowDebug,
   };
 }
