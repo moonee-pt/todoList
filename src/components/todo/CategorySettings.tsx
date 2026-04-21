@@ -63,8 +63,8 @@ const Row = ({
     id: c.id,
   });
   const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+    transform: isDragging ? CSS.Transform.toString(transform) : undefined,
+    transition: isDragging ? transition : undefined,
     opacity: isDragging ? 0.6 : 1,
     zIndex: isDragging ? 10 : "auto",
   };
