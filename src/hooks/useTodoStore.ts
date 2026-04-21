@@ -98,13 +98,14 @@ export function useTodoStore() {
     log(`分类: ${finalCategories.length} 个`);
     log(`任务: ${finalTasks.length} 个`);
 
-    setDebugInfo(logs.join("\n"));
-    setCategories(finalCategories);
-    setTasks(finalTasks);
     firstLoadDone.current = true;
 
     localStorage.setItem(KEY_CATEGORIES, JSON.stringify(finalCategories));
     localStorage.setItem(KEY_TASKS, JSON.stringify(finalTasks));
+
+    setDebugInfo(logs.join("\n"));
+    setCategories(finalCategories);
+    setTasks(finalTasks);
 
     log("数据已写回 localStorage，修复完成！");
   }, []);
