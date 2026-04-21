@@ -179,8 +179,8 @@ export const CategorySettings = ({
   onAddSubCategory,
 }: Props) => {
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 3, tolerance: 5 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 100, tolerance: 15 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 10 } })
   );
 
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => {

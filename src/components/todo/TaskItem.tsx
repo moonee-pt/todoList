@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Task, Category, colorVar } from "@/lib/todo-types";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Check, Trash2, Edit2 } from "lucide-react";
+import { Check, Trash2, Edit2, GripVertical } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -60,13 +60,18 @@ export const TaskItem = ({ task, category, onToggle, onDelete, onEdit, onStartEd
         ref={setNodeRef}
         style={style}
         {...attributes}
-        {...listeners}
-        className={`group relative flex items-center bg-card border border-border/70 rounded-2xl pl-4 pr-3 py-3 transition-all duration-200 touch-none ${
-          isDragging
-            ? "shadow-xl scale-[1.02] cursor-grabbing"
-            : "shadow-soft cursor-grab hover:shadow-md hover:border-border"
+        className={`relative flex items-center bg-card border border-border/70 rounded-2xl pr-3 py-3 transition-all duration-200 ${
+          isDragging ? "shadow-xl scale-[1.02]" : "shadow-soft"
         }`}
       >
+        <button
+          {...listeners}
+          className="touch-none text-muted-foreground/40 hover:text-foreground p-1.5 ml-2 cursor-grab active:cursor-grabbing"
+          aria-label="拖拽排序"
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+
         <button
           onClick={(e) => {
             e.stopPropagation();

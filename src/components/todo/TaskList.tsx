@@ -45,14 +45,13 @@ export const TaskList = ({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 3,
-        tolerance: 5,
+        distance: 5,
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 100,
-        tolerance: 15,
+        delay: 200,
+        tolerance: 10,
       },
     })
   );
