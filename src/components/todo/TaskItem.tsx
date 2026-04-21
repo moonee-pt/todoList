@@ -35,8 +35,8 @@ export const TaskItem = ({ task, category, onToggle, onDelete, onEdit, onStartEd
   const [isLeaving, setIsLeaving] = useState(false);
 
   const style: React.CSSProperties = {
-    transform: isDragging ? CSS.Transform.toString(transform) : undefined,
-    transition: isDragging ? "transform 200ms cubic-bezier(0.2, 0, 0, 1)" : undefined,
+    transform: CSS.Transform.toString(transform),
+    transition: isDragging ? undefined : transition,
     opacity: isDragging ? 0.95 : 1,
     zIndex: isDragging ? 999 : "auto",
   };
