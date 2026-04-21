@@ -89,19 +89,53 @@ export function useTodoStore() {
     }
 
     if (allTaskArrays.length === 0) {
-      log("没有找到带 .text 的数组，开始暴力搜索所有长数组...");
+      log("开始深度挖掘所有长条目...");
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (!key) continue;
         const raw = localStorage.getItem(key);
-        if (!raw || raw.length < 100) continue;
+        if (!raw) continue;
 
-        try {
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            log(`可疑长数组: ${key} => 长度 ${parsed.length}, 首项: ${JSON.stringify(parsed[0]).slice(0, 80)}`);
+        log(`检查: ${key}, 长度: ${raw.length}`);
+
+        if (raw.length > 500) {
+          const taskCount = (raw.match(/"text"/g) || []).length;
+          log(`  → 包含 "text" 字段数量: ${taskCount}`);
+
+          if (taskCount > 0) {
+            log(`  ⚠️  这个里面有任务！开始深度解析...`);
+
+            try {
+              let content = raw;
+              for (let depth = 0; depth < 5; depth++) {
+                try {
+                  const parsed = JSON.parse(content);
+                  if (Array.isArray(parsed) && parsed.length > 0) {
+                    if (parsed[0].text || parsed[0].priorityId) {
+                      log(`  ✅ 在第 ${depth} 层找到任务数组！长度: ${parsed.length}`);
+                      const mapped = parsed.map((t: any) => ({
+                        ...t,
+                        categoryId: t.categoryId || t.priorityId,
+                      }));
+                      allTaskArrays.push({ key: `RESCUED_${key}_depth${depth}`, tasks: mapped });
+                      break;
+                    }
+                  }
+                  if (parsed && typeof parsed === "object") {
+                    for (const k of Object.keys(parsed)) {
+                      if (JSON.stringify(parsed[k]).includes('"text"')) {
+                        content = JSON.stringify(parsed[k]);
+                        break;
+                      }
+                    }
+                  }
+                } catch {}
+              }
+            } catch (e) {
+              log(`  解析失败: ${e}`);
+            }
           }
-        } catch {}
+        }
       }
     }
 
