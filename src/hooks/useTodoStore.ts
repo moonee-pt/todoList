@@ -64,15 +64,45 @@ export function useTodoStore() {
 
       try {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].text) {
-          const mapped = parsed.map((t: any) => ({
-            ...t,
-            categoryId: t.categoryId || t.priorityId,
-          }));
-          allTaskArrays.push({ key, tasks: mapped });
-          log(`找到任务数组: ${key} => ${mapped.length} 个任务`);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          if (parsed[0].text || parsed[0].priorityId || parsed[0].categoryId || parsed[0].done) {
+            const mapped = parsed.map((t: any) => ({
+              ...t,
+              categoryId: t.categoryId || t.priorityId,
+            }));
+            allTaskArrays.push({ key, tasks: mapped });
+            log(`找到任务数组: ${key} => ${mapped.length} 个任务`);
+          }
+        }
+
+        if (parsed && typeof parsed === "object") {
+          for (const subKey of Object.keys(parsed)) {
+            const val = parsed[subKey];
+            if (Array.isArray(val) && val.length > 0) {
+              if (val[0].text || val[0].priorityId) {
+                log(`嵌套对象中发现任务: ${key}.${subKey} => ${val.length} 个`);
+              }
+            }
+          }
         }
       } catch {}
+    }
+
+    if (allTaskArrays.length === 0) {
+      log("没有找到带 .text 的数组，开始暴力搜索所有长数组...");
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key) continue;
+        const raw = localStorage.getItem(key);
+        if (!raw || raw.length < 100) continue;
+
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            log(`可疑长数组: ${key} => 长度 ${parsed.length}, 首项: ${JSON.stringify(parsed[0]).slice(0, 80)}`);
+          }
+        } catch {}
+      }
     }
 
     if (allTaskArrays.length > 0) {
