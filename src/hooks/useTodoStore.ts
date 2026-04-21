@@ -85,10 +85,13 @@ export function useTodoStore() {
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, text: text.trim() } : t)));
   }, []);
 
-  const reorderTasks = useCallback((isDone: boolean, from: number, to: number) => {
+  const reorderTasks = useCallback((isDone: boolean, fromId: string, toId: string) => {
     setTasks((prev) => {
       const filtered = prev.filter((t) => t.done === isDone);
       const rest = prev.filter((t) => t.done !== isDone);
+      const from = filtered.findIndex((t) => t.id === fromId);
+      const to = filtered.findIndex((t) => t.id === toId);
+      if (from === -1 || to === -1 || from === to) return prev;
       const [item] = filtered.splice(from, 1);
       filtered.splice(to, 0, item);
       return [...filtered, ...rest];
