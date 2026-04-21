@@ -17,131 +17,58 @@ export function useTodoStore() {
 
     const logs: string[] = [];
     const log = (msg: string) => {
-      console.log("[DATA_RESCUE]", msg);
+      console.log("[INIT]", msg);
       logs.push(msg);
     };
 
-    log("=== 开始数据恢复 ===");
-    log("LocalStorage 条目总数: " + localStorage.length);
-
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key) {
-        const raw = localStorage.getItem(key);
-        const len = raw ? raw.length : 0;
-        log(`找到 Key: ${key} (长度: ${len})`);
-      }
-    }
-
-    const catRaw = localStorage.getItem(KEY_CATEGORIES);
-    const taskRaw = localStorage.getItem(KEY_TASKS);
-    const oldPrioRaw = localStorage.getItem(KEY_OLD_PRIORITIES);
-
-    log("");
-    log(`KEY_CATEGORIES 存在: ${!!catRaw}`);
-    log(`KEY_TASKS 存在: ${!!taskRaw}, 内容长度: ${taskRaw?.length || 0}`);
-    log(`KEY_OLD_PRIORITIES 存在: ${!!oldPrioRaw}`);
-
-    let finalCategories: Category[] = DEFAULT_CATEGORIES;
+    let finalCategories = DEFAULT_CATEGORIES;
     let finalTasks: Task[] = [];
 
-    if (catRaw) {
-      try {
+    try {
+      const catRaw = localStorage.getItem(KEY_CATEGORIES);
+      const taskRaw = localStorage.getItem(KEY_TASKS);
+
+      if (catRaw) {
         finalCategories = JSON.parse(catRaw);
-        log(`加载分类成功: ${finalCategories.length} 个`);
-      } catch (e) {
-        log(`解析分类失败: ${e}`);
+        log(`✓ 加载分类: ${finalCategories.length} 个`);
       }
-    }
 
-    let allTaskArrays: { key: string; tasks: Task[] }[] = [];
-
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (!key) continue;
-      const raw = localStorage.getItem(key);
-      if (!raw) continue;
-
-      try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          if (parsed[0].text || parsed[0].priorityId || parsed[0].categoryId || parsed[0].done) {
-            const mapped = parsed.map((t: any) => ({
-              ...t,
-              categoryId: t.categoryId || t.priorityId,
-            }));
-            allTaskArrays.push({ key, tasks: mapped });
-            log(`找到任务数组: ${key} => ${mapped.length} 个任务`);
-          }
-        }
-
-        if (parsed && typeof parsed === "object") {
-          for (const subKey of Object.keys(parsed)) {
-            const val = parsed[subKey];
-            if (Array.isArray(val) && val.length > 0) {
-              if (val[0].text || val[0].priorityId) {
-                log(`嵌套对象中发现任务: ${key}.${subKey} => ${val.length} 个`);
-              }
-            }
-          }
-        }
-      } catch {}
-    }
-
-    if (allTaskArrays.length === 0) {
-      log("开始人肉检视所有长条目...");
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (!key) continue;
-        const raw = localStorage.getItem(key);
-        if (!raw) continue;
-
-        if (raw.length > 1000) {
-          log("");
-          log(`═══════════════════════════════════`);
-          log(`KEY: ${key}`);
-          log(`长度: ${raw.length} 字符`);
-          log(`═══════════════════════════════════`);
-          log(`前 800 字符内容:`);
-          log(raw.slice(0, 800));
-          log(`═══════════════════════════════════`);
+      if (taskRaw) {
+        const rawTasks = JSON.parse(taskRaw);
+        if (rawTasks.length > 0) {
+          finalTasks = rawTasks.map((t: any) => ({
+            ...t,
+            categoryId: t.categoryId || t.priorityId,
+          }));
+          log(`✓ 加载任务: ${finalTasks.length} 个`);
         }
       }
+
+      if (finalTasks.length === 0) {
+        const oldPrioRaw = localStorage.getItem(KEY_OLD_PRIORITIES);
+        if (oldPrioRaw && taskRaw) {
+          finalTasks = JSON.parse(taskRaw).map((t: any) => ({
+            ...t,
+            categoryId: t.categoryId || t.priorityId,
+          }));
+          log(`✓ 从旧版迁移: ${finalTasks.length} 个任务`);
+        }
+      }
+    } catch (e) {
+      log(`✗ 加载错误: ${e}`);
     }
 
-    if (allTaskArrays.length > 0) {
-      allTaskArrays.sort((a, b) => b.tasks.length - a.tasks.length);
-      const best = allTaskArrays[0];
-      log(`选择任务最多的: ${best.key} => ${best.tasks.length} 个任务`);
-      finalTasks = best.tasks;
-    }
-
-    if (finalTasks.length === 0 && oldPrioRaw && taskRaw) {
-      log("旧优先级数据存在，重新迁移任务...");
-      try {
-        finalTasks = JSON.parse(taskRaw).map((t: any) => ({
-          ...t,
-          categoryId: t.categoryId || t.priorityId,
-        }));
-        log(`从原始数据迁移成功: ${finalTasks.length} 个任务`);
-      } catch {}
-    }
-
-    log("");
-    log(`=== 最终结果 ===`);
+    log(`=== 最终状态 ===`);
     log(`分类: ${finalCategories.length} 个`);
     log(`任务: ${finalTasks.length} 个`);
 
     firstLoadDone.current = true;
-
     localStorage.setItem(KEY_CATEGORIES, JSON.stringify(finalCategories));
     localStorage.setItem(KEY_TASKS, JSON.stringify(finalTasks));
 
     setDebugInfo(logs.join("\n"));
     setCategories(finalCategories);
     setTasks(finalTasks);
-
-    log("数据已写回 localStorage，修复完成！");
   }, []);
 
   useEffect(() => {
